@@ -23,8 +23,7 @@ class ScreenLightGroups(BaseScreen):
     def setup(self, all_sprites):
         super().setup(all_sprites)
 
-        if self.app.firstScreen != self:
-            all_sprites.add(LcarsBlockMedium(colours.RED_BROWN, (145, 16), "BACK", self.back_handler), layer=1)
+        all_sprites.add(LcarsBlockMedium(colours.RED_BROWN, (145, 16), "BACK", self.back_handler), layer=1)
 
         try:
             self.bridge = Bridge(self.app.config['hue_ip'])
