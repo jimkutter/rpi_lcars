@@ -1,21 +1,25 @@
 import pygame
 from pygame.mixer import Sound
 
+from screens.base_screen import BaseScreen
 from ui import colours
 from ui.widgets.background import LcarsBackgroundImage
 from ui.widgets.gifimage import LcarsGifImage
-from ui.widgets.lcars_widgets import LcarsText
-from ui.widgets.screen import LcarsScreen
 from ui.widgets.lcars_widgets import LcarsButton
+from ui.widgets.lcars_widgets import LcarsText
 
-class ScreenAuthorize(LcarsScreen):
+
+class ScreenAuthorize(BaseScreen):
+
+    def __init__(self, app):
+        super().__init__(app, None, None)
 
     def setup(self, all_sprites):
         all_sprites.add(LcarsBackgroundImage("assets/lcars_screen_2.png"),
                         layer=0)
 
-        all_sprites.add(LcarsGifImage("assets/gadgets/stlogorotating.gif", (103, 369), 50), 
-                        layer=0)        
+        all_sprites.add(LcarsGifImage("assets/gadgets/stlogorotating.gif", (103, 369), 50),
+                        layer=0)
 
         all_sprites.add(LcarsText(colours.ORANGE, (270, -1), "AUTHORIZATION REQUIRED", 2),
                         layer=0)
@@ -25,9 +29,8 @@ class ScreenAuthorize(LcarsScreen):
 
         all_sprites.add(LcarsText(colours.BLUE, (360, -1), "TOUCH TERMINAL TO PROCEED", 1.5),
                         layer=1)
-        
-        #all_sprites.add(LcarsText(colours.BLUE, (390, -1), "FAILED ATTEMPTS WILL BE REPORTED", 1.5),layer=1)
 
+        # all_sprites.add(LcarsText(colours.BLUE, (390, -1), "FAILED ATTEMPTS WILL BE REPORTED", 1.5),layer=1)
 
         all_sprites.add(LcarsButton(colours.GREY_BLUE, (320, 130), "1", self.num_1), layer=2)
         all_sprites.add(LcarsButton(colours.GREY_BLUE, (370, 130), "2", self.num_2), layer=2)
@@ -52,7 +55,7 @@ class ScreenAuthorize(LcarsScreen):
         ############
         # SET PIN CODE WITH THIS VARIABLE
         ############
-        self.pin = 1234
+        self.pin = self.app.config['pin']
         ############
         self.reset()
 
@@ -79,7 +82,7 @@ class ScreenAuthorize(LcarsScreen):
                 if (self.correct == 4):
                     self.sound_granted.play()
                     from screens.main import ScreenMain
-                    self.loadScreen(ScreenMain())
+                    self.loadScreen(ScreenMain(self.app))
                 else:
                     self.sound_deny2.play()
                     self.sound_denied.play()

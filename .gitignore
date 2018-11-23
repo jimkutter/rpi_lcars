@@ -57,3 +57,12 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# local config
+config.json
+
+# intellij
+.idea
+
+# virtual env
+venv
