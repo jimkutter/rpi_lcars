@@ -9,37 +9,75 @@ from ui.widgets.lcars_widgets import LcarsButton
 from ui.widgets.lcars_widgets import LcarsText
 
 
+class CodeButton(LcarsButton):
+
+    def __init__(self, colour, pos, text, handler=None, rectSize=None):
+        super().__init__(colour, pos, text, handler, rectSize)
+        self.code = None
+
+
 class ScreenAuthorize(BaseScreen):
 
     def __init__(self, app):
         super().__init__(app, None, None)
 
     def setup(self, all_sprites):
-        all_sprites.add(LcarsBackgroundImage("assets/lcars_screen_2.png"),
-                        layer=0)
+        all_sprites.add(LcarsBackgroundImage("assets/lcars_screen_2.png"), layer=0)
 
-        all_sprites.add(LcarsGifImage("assets/gadgets/stlogorotating.gif", (103, 369), 50),
-                        layer=0)
+        all_sprites.add(LcarsGifImage("assets/gadgets/stlogorotating.gif", (103, 369), 50), layer=0)
 
-        all_sprites.add(LcarsText(colours.ORANGE, (270, -1), "AUTHORIZATION REQUIRED", 2),
-                        layer=0)
+        all_sprites.add(LcarsText(colours.ORANGE, (270, -1), "AUTHORIZATION REQUIRED", 2), layer=0)
 
         all_sprites.add(LcarsText(colours.BLUE, (330, -1), "ONLY AUTHORIZED PERSONNEL MAY ACCESS THIS TERMINAL", 1.5),
                         layer=1)
 
-        all_sprites.add(LcarsText(colours.BLUE, (360, -1), "TOUCH TERMINAL TO PROCEED", 1.5),
-                        layer=1)
+        all_sprites.add(LcarsText(colours.BLUE, (360, -1), "TOUCH TERMINAL TO PROCEED", 1.5), layer=1)
 
-        # all_sprites.add(LcarsText(colours.BLUE, (390, -1), "FAILED ATTEMPTS WILL BE REPORTED", 1.5),layer=1)
+        greek_alphabet = [
+            "alpha",
+            "beta",
+            "gamma",
+            "delta",
+            "epsilon",
+            "zeta",
+            "eta",
+            "theta",
+            "iota",
+            "kappa",
+            "lambda",
+            "mu",
+            "nu",
+            "xi",
+            "omicron",
+            "pi",
+            "rho",
+            "sigma",
+            "tau",
+            "upsilon",
+            "phi",
+            "chi",
+            "psi",
+            "omega",
+        ]
 
-        all_sprites.add(LcarsButton(colours.GREY_BLUE, (320, 130), "1", self.num_1), layer=2)
-        all_sprites.add(LcarsButton(colours.GREY_BLUE, (370, 130), "2", self.num_2), layer=2)
-        all_sprites.add(LcarsButton(colours.GREY_BLUE, (320, 270), "3", self.num_3), layer=2)
-        all_sprites.add(LcarsButton(colours.GREY_BLUE, (370, 270), "4", self.num_4), layer=2)
-        all_sprites.add(LcarsButton(colours.GREY_BLUE, (320, 410), "5", self.num_5), layer=2)
-        all_sprites.add(LcarsButton(colours.GREY_BLUE, (370, 410), "6", self.num_6), layer=2)
-        all_sprites.add(LcarsButton(colours.GREY_BLUE, (320, 550), "7", self.num_7), layer=2)
-        all_sprites.add(LcarsButton(colours.GREY_BLUE, (370, 550), "8", self.num_8), layer=2)
+        x_orig = 127
+        y_orig = 75
+        padding = 20
+        width = 122
+        height = 44
+        row = 0
+        col = 0
+        for letter in greek_alphabet:
+            x = x_orig + (col * (width + padding / 2))
+            y = y_orig + (row * (height + padding / 2))
+            button = CodeButton(colours.GREY_BLUE, (y, x), letter.upper(), self.button_handler)
+            button.code = letter
+            col = col + 1
+            if col > 3:
+                row = row + 1
+                col = 0
+
+            all_sprites.add(button, layer=2)
 
         self.layer1 = all_sprites.get_sprites_from_layer(1)
         self.layer2 = all_sprites.get_sprites_from_layer(2)
@@ -73,13 +111,13 @@ class ScreenAuthorize(BaseScreen):
             self.sound_beep1.play()
 
         if event.type == pygame.MOUSEBUTTONUP:
-            if (not self.layer2[0].visible):
+            if not self.layer2[0].visible:
                 for sprite in self.layer1: sprite.visible = False
                 for sprite in self.layer2: sprite.visible = True
                 Sound("assets/audio/enter_authorization_code.wav").play()
-            elif (self.pin_i == len(str(self.pin))):
+            elif self.pin_i == len(self.pin):
                 # Ran out of button presses
-                if (self.correct == 4):
+                if self.correct == len(self.pin):
                     self.sound_granted.play()
                     from screens.main import ScreenMain
                     self.loadScreen(ScreenMain(self.app))
@@ -90,50 +128,9 @@ class ScreenAuthorize(BaseScreen):
 
         return False
 
-    def num_1(self, item, event, clock):
-        if str(self.pin)[self.pin_i] == '1':
+    def button_handler(self, item, event, clock):
+        if self.pin[self.pin_i] == item.code:
             self.correct += 1
-
-        self.pin_i += 1
-
-    def num_2(self, item, event, clock):
-        if str(self.pin)[self.pin_i] == '2':
-            self.correct += 1
-
-        self.pin_i += 1
-
-    def num_3(self, item, event, clock):
-        if str(self.pin)[self.pin_i] == '3':
-            self.correct += 1
-
-        self.pin_i += 1
-
-    def num_4(self, item, event, clock):
-        if str(self.pin)[self.pin_i] == '4':
-            self.correct += 1
-
-        self.pin_i += 1
-
-    def num_5(self, item, event, clock):
-        if str(self.pin)[self.pin_i] == '5':
-            self.correct += 1
-
-        self.pin_i += 1
-
-    def num_6(self, item, event, clock):
-        if str(self.pin)[self.pin_i] == '6':
-            self.correct += 1
-
-        self.pin_i += 1
-
-    def num_7(self, item, event, clock):
-        if str(self.pin)[self.pin_i] == '7':
-            self.correct += 1
-
-        self.pin_i += 1
-
-    def num_8(self, item, event, clock):
-        if str(self.pin)[self.pin_i] == '8':
-            self.correct += 1
+            print(self.correct)
 
         self.pin_i += 1
