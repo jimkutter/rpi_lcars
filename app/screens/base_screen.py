@@ -6,7 +6,7 @@ from pygame.mixer import Sound
 from datasources.network import get_ip_address_string
 from ui import colours
 from ui.widgets.background import LcarsBackgroundImage
-from ui.widgets.lcars_widgets import LcarsText, LcarsButton, LcarsBlockMedium
+from ui.widgets.lcars_widgets import LcarsText, LcarsButton
 from ui.widgets.screen import LcarsScreen
 
 
@@ -23,7 +23,7 @@ class BaseScreen(LcarsScreen):
         self.screen_timeout = datetime.now() + timedelta(seconds=self.app.config['screen_timeout'])
 
     def setup(self, all_sprites):
-        all_sprites.add(LcarsBackgroundImage(self.background), layer=0)
+        all_sprites.add(self.app.assets[self.background], layer=0)
         # panel text
         all_sprites.add(LcarsText(colours.BLACK, (15, 35), self.app.config['version']), layer=1)
         all_sprites.add(LcarsText(colours.ORANGE, (5, 135), self.title, 2), layer=1)
@@ -37,21 +37,23 @@ class BaseScreen(LcarsScreen):
         all_sprites.add(self.stardate, layer=1)
 
         # buttons
-        all_sprites.add(LcarsButton(colours.RED_BROWN, (6, 662), "LOGOUT", self.logout_handler),
-                        layer=4)
+        self.logout = LcarsButton(colours.RED_BROWN, (6, 662), "LOGOUT", self.logout_handler)
+        all_sprites.add(self.logout, layer=4)
 
         self.beep1 = Sound("assets/audio/panel/201.wav")
         Sound("assets/audio/panel/220.wav").play()
 
     def logout_handler(self, item, event, clock):
+        self.logout.visible = False
         from screens.destruct import ScreenDestruct
         self.loadScreen(ScreenDestruct(self.app))
 
     def screen_update(self):
         screen_delta = self.screen_timeout - datetime.now()
         if int(screen_delta.total_seconds()) == 0:
-            from screens.blank import ScreenBlank
-            self.loadScreen(ScreenBlank(self.app))
+            self.app.screen_off()
+            from screens.authorize import ScreenAuthorize
+            self.loadScreen(ScreenAuthorize(self.app))
             from pygame.event import Event
             pygame.event.post(Event(pygame.USEREVENT))
 

@@ -12,7 +12,7 @@ class ScreenDestruct(BaseScreen):
         super().__init__(app, "assets/lcars_screen_destruct.png", "AUTO DESTRUCT")
         self.timer = None
         self.delta = None
-        self.timeout = datetime.now() + timedelta(seconds=self.app.config['destruct_timeout'])
+        self.timeout = None
         self.crack = None
 
     def setup(self, all_sprites):
@@ -21,11 +21,13 @@ class ScreenDestruct(BaseScreen):
         self.timer = LcarsText((77, 19, 22), (180, 280), "00:00:00", 7.0)
         all_sprites.add(self.timer, layer=1)
 
-        self.crack = LcarsGifImage("assets/glass-fast.gif", (0, 0), 50)
+        self.crack = self.app.assets['assets/glass-fast.gif']
         self.crack.pause()
         self.crack.visible = False
 
         all_sprites.add(self.crack, layer=5)
+
+        self.timeout = datetime.now() + timedelta(seconds=self.app.config['destruct_timeout'])
 
         self.update_timer()
 

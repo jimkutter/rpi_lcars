@@ -121,6 +121,7 @@ class ScreenAuthorize(BaseScreen):
         if event.type == pygame.MOUSEBUTTONDOWN:
             # Play sound
             self.sound_beep1.play()
+            self.app.screen_on()
 
         if event.type == pygame.MOUSEBUTTONUP:
             if not self.layer2[0].visible:
