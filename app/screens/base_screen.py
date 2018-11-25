@@ -22,13 +22,10 @@ class BaseScreen(LcarsScreen):
         self.stardate = None
 
     def setup(self, all_sprites):
-        all_sprites.add(LcarsBackgroundImage(self.background),
-                        layer=0)
+        all_sprites.add(LcarsBackgroundImage(self.background), layer=0)
         # panel text
-        all_sprites.add(LcarsText(colours.BLACK, (15, 35), self.app.config['version']),
-                        layer=1)
-        all_sprites.add(LcarsText(colours.ORANGE, (5, 135), self.title, 2),
-                        layer=1)
+        all_sprites.add(LcarsText(colours.BLACK, (15, 35), self.app.config['version']), layer=1)
+        all_sprites.add(LcarsText(colours.ORANGE, (5, 135), self.title, 2), layer=1)
 
         self.ip_address = LcarsText(colours.BLACK, (444, 520), get_ip_address_string())
         all_sprites.add(self.ip_address, layer=1)
@@ -46,19 +43,26 @@ class BaseScreen(LcarsScreen):
         Sound("assets/audio/panel/220.wav").play()
 
     def logout_handler(self, item, event, clock):
-        from screens.authorize import ScreenAuthorize
-        self.loadScreen(ScreenAuthorize(self.app))
+        from screens.destruct import ScreenDestruct
+        self.loadScreen(ScreenDestruct(self.app))
+
+    def screen_update(self):
+        pass
 
     def update(self, screenSurface, fpsClock):
         if pygame.time.get_ticks() - self.last_clock_update > 1000:
             if self.stardate is not None:
                 self.stardate.setText("STAR DATE {}".format(datetime.now().strftime("%d%m.%y %H:%M:%S")))
                 self.last_clock_update = pygame.time.get_ticks()
+
+        self.screen_update()
+
         LcarsScreen.update(self, screenSurface, fpsClock)
 
     def handleEvents(self, event, fpsClock):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            self.beep1.play()
+            if self.beep1:
+                self.beep1.play()
 
         if event.type == pygame.MOUSEBUTTONUP:
             return False

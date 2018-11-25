@@ -1,7 +1,5 @@
 import json
 
-from screens.authorize import ScreenAuthorize
-from screens.register_hue import ScreenRegister
 from ui.ui import UserInterface
 
 # global config
@@ -13,14 +11,14 @@ DEV_MODE = True
 
 class App(object):
     def __init__(self):
-        self.firstScreen = ScreenAuthorize(self)
-
         self.config = {}
-
-    def run(self):
         with open('config.json') as json_data_file:
             self.config = json.load(json_data_file)
 
+        from screens.authorize import ScreenAuthorize
+        self.firstScreen = ScreenAuthorize(self)
+
+    def run(self):
         ui = UserInterface(self.firstScreen, RESOLUTION, UI_PLACEMENT_MODE, FPS, DEV_MODE)
 
         while True:

@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 import pygame
 from pygame.mixer import Sound
 
@@ -20,6 +22,10 @@ class ScreenAuthorize(BaseScreen):
 
     def __init__(self, app):
         super().__init__(app, None, None)
+        self.screen_timeout = None
+        self.login_timeout = None
+
+        self.reset_timers(False)
 
     def setup(self, all_sprites):
         all_sprites.add(LcarsBackgroundImage("assets/lcars_screen_2.png"), layer=0)
@@ -105,6 +111,20 @@ class ScreenAuthorize(BaseScreen):
         for sprite in self.layer1: sprite.visible = True
         for sprite in self.layer2: sprite.visible = False
 
+    def screen_update(self):
+        super().screen_update()
+        screen_delta = self.screen_timeout - datetime.now()
+        if int(screen_delta.total_seconds()) == 0:
+            from screens.blank import ScreenBlank
+            self.loadScreen(ScreenBlank(self.app))
+            from pygame.event import Event
+            pygame.event.post(Event(pygame.USEREVENT))
+
+        if self.login_timeout:
+            auth_delta = self.login_timeout - datetime.now()
+            if int(auth_delta.total_seconds()) == 0:
+                self.reset()
+
     def handleEvents(self, event, fpsClock):
         if event.type == pygame.MOUSEBUTTONDOWN:
             # Play sound
@@ -112,9 +132,7 @@ class ScreenAuthorize(BaseScreen):
 
         if event.type == pygame.MOUSEBUTTONUP:
             if not self.layer2[0].visible:
-                for sprite in self.layer1: sprite.visible = False
-                for sprite in self.layer2: sprite.visible = True
-                Sound("assets/audio/enter_authorization_code.wav").play()
+                self.show_login_controls()
             elif self.pin_i == len(self.pin):
                 # Ran out of button presses
                 if self.correct == len(self.pin):
@@ -128,9 +146,21 @@ class ScreenAuthorize(BaseScreen):
 
         return False
 
+    def show_login_controls(self):
+        for sprite in self.layer1: sprite.visible = False
+        for sprite in self.layer2: sprite.visible = True
+        Sound("assets/audio/enter_authorization_code.wav").play()
+        self.reset_timers(True)
+
     def button_handler(self, item, event, clock):
+        self.reset_timers(True)
         if self.pin[self.pin_i] == item.code:
             self.correct += 1
             print(self.correct)
 
         self.pin_i += 1
+
+    def reset_timers(self, both):
+        self.screen_timeout = datetime.now() + timedelta(seconds=self.app.config['screen_timeout'])
+        if both:
+            self.login_timeout = datetime.now() + timedelta(seconds=self.app.config['login_timeout'])

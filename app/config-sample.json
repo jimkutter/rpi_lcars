@@ -1,0 +1,11 @@
+{
+  "hue_ip": "<philips hue ip>>",
+  "pin": [
+    "alpha"
+  ],
+  "version": "<anything you want>",
+  "destruct_timeout": 10,
+  "screen_timeout": 300,
+  "login_timeout": 30
+}
+
