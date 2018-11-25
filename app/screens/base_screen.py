@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pygame
 from pygame.mixer import Sound
@@ -20,6 +20,7 @@ class BaseScreen(LcarsScreen):
         self.ip_address = None
         self.beep1 = None
         self.stardate = None
+        self.screen_timeout = datetime.now() + timedelta(seconds=self.app.config['screen_timeout'])
 
     def setup(self, all_sprites):
         all_sprites.add(LcarsBackgroundImage(self.background), layer=0)
@@ -47,7 +48,12 @@ class BaseScreen(LcarsScreen):
         self.loadScreen(ScreenDestruct(self.app))
 
     def screen_update(self):
-        pass
+        screen_delta = self.screen_timeout - datetime.now()
+        if int(screen_delta.total_seconds()) == 0:
+            from screens.blank import ScreenBlank
+            self.loadScreen(ScreenBlank(self.app))
+            from pygame.event import Event
+            pygame.event.post(Event(pygame.USEREVENT))
 
     def update(self, screenSurface, fpsClock):
         if pygame.time.get_ticks() - self.last_clock_update > 1000:
@@ -60,6 +66,7 @@ class BaseScreen(LcarsScreen):
         LcarsScreen.update(self, screenSurface, fpsClock)
 
     def handleEvents(self, event, fpsClock):
+        self.screen_timeout = datetime.now() + timedelta(seconds=self.app.config['screen_timeout'])
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.beep1:
                 self.beep1.play()

@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import pygame
 
 from screens.base_screen import BaseScreen
+from ui.widgets.gifimage import LcarsGifImage
 from ui.widgets.lcars_widgets import LcarsText
 
 
@@ -12,12 +13,20 @@ class ScreenDestruct(BaseScreen):
         self.timer = None
         self.delta = None
         self.timeout = datetime.now() + timedelta(seconds=self.app.config['destruct_timeout'])
+        self.crack = None
 
     def setup(self, all_sprites):
         super().setup(all_sprites)
 
         self.timer = LcarsText((77, 19, 22), (180, 280), "00:00:00", 7.0)
         all_sprites.add(self.timer, layer=1)
+
+        self.crack = LcarsGifImage("assets/glass-fast.gif", (0, 0), 50)
+        self.crack.pause()
+        self.crack.visible = False
+
+        all_sprites.add(self.crack, layer=5)
+
         self.update_timer()
 
     def screen_update(self):
@@ -25,6 +34,11 @@ class ScreenDestruct(BaseScreen):
         self.update_timer()
 
         if int(self.delta.total_seconds()) == 0:
+            if not self.crack.visible:
+                self.crack.play()
+                self.crack.visible = True
+
+        if int(self.delta.total_seconds()) == -1:
             from screens.authorize import ScreenAuthorize
             self.loadScreen(ScreenAuthorize(self.app))
             from pygame.event import Event
@@ -42,4 +56,5 @@ class ScreenDestruct(BaseScreen):
         # remaining seconds
         seconds = seconds - (minutes * 60)
         # total time
-        self.timer.setText('{:02}:{:02}:{:02}'.format(int(hours), int(minutes), int(seconds)))
+        if not self.crack.visible:
+            self.timer.setText('{:02}:{:02}:{:02}'.format(int(hours), int(minutes), int(seconds)))

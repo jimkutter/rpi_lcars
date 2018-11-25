@@ -22,10 +22,8 @@ class ScreenAuthorize(BaseScreen):
 
     def __init__(self, app):
         super().__init__(app, None, None)
-        self.screen_timeout = None
         self.login_timeout = None
-
-        self.reset_timers(False)
+        self.reset_timer()
 
     def setup(self, all_sprites):
         all_sprites.add(LcarsBackgroundImage("assets/lcars_screen_2.png"), layer=0)
@@ -113,12 +111,6 @@ class ScreenAuthorize(BaseScreen):
 
     def screen_update(self):
         super().screen_update()
-        screen_delta = self.screen_timeout - datetime.now()
-        if int(screen_delta.total_seconds()) == 0:
-            from screens.blank import ScreenBlank
-            self.loadScreen(ScreenBlank(self.app))
-            from pygame.event import Event
-            pygame.event.post(Event(pygame.USEREVENT))
 
         if self.login_timeout:
             auth_delta = self.login_timeout - datetime.now()
@@ -150,17 +142,15 @@ class ScreenAuthorize(BaseScreen):
         for sprite in self.layer1: sprite.visible = False
         for sprite in self.layer2: sprite.visible = True
         Sound("assets/audio/enter_authorization_code.wav").play()
-        self.reset_timers(True)
+        self.reset_timer()
 
     def button_handler(self, item, event, clock):
-        self.reset_timers(True)
+        self.reset_timer()
         if self.pin[self.pin_i] == item.code:
             self.correct += 1
             print(self.correct)
 
         self.pin_i += 1
 
-    def reset_timers(self, both):
-        self.screen_timeout = datetime.now() + timedelta(seconds=self.app.config['screen_timeout'])
-        if both:
-            self.login_timeout = datetime.now() + timedelta(seconds=self.app.config['login_timeout'])
+    def reset_timer(self):
+        self.login_timeout = datetime.now() + timedelta(seconds=self.app.config['login_timeout'])
