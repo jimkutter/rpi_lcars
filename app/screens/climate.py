@@ -8,7 +8,22 @@ from pygame.mixer import Sound
 from screens.base_screen import BaseScreen
 from screens.main import ScreenMain
 from ui import colours
-from ui.widgets.lcars_widgets import LcarsBlockMedium, LcarsText
+from ui.widgets.lcars_widgets import LcarsBlockMedium, LcarsText, LcarsButton
+
+
+class ThermostatButton(LcarsButton):
+    def __init__(self, thermostat, pos):
+        self.thermostat = thermostat
+
+        color = colours.RED_BROWN if thermostat.temperature > 65 else colours.GREY_BLUE
+
+        super().__init__(color,
+                         pos,
+                         "%s (%s)" % (thermostat.name, thermostat.temperature),
+                         self.handler)
+
+    def handler(self, item, event, clock):
+        pass
 
 
 class ClimateScreen(BaseScreen):
@@ -28,8 +43,14 @@ class ClimateScreen(BaseScreen):
 
         all_sprites.add(LcarsBlockMedium(colours.RED_BROWN, (145, 16), "BACK", self.back_handler), layer=1)
 
-        buttons = list(string.ascii_lowercase) + list(string.digits) + ["DEL"]
+        if self.napi.authorization_required:
+            self.add_pin_entry_sprites(all_sprites)
+            self.show_pin_entry()
+        else:
+            self.add_thermostats(all_sprites)
 
+    def add_pin_entry_sprites(self, all_sprites):
+        buttons = list(string.ascii_lowercase) + list(string.digits) + ["DEL"]
         x_orig = 127
         y_orig = 197
         padding = 20
@@ -42,7 +63,8 @@ class ClimateScreen(BaseScreen):
             x = x_orig + (col * (width + padding / 2))
             y = y_orig + (row * (height + padding / 2))
             from screens.authorize import CodeButton
-            button = CodeButton(colours.GREY_BLUE, (y, x), str(letter).upper(), self.button_handler, (width, height))
+            button = CodeButton(colours.GREY_BLUE, (y, x), str(letter).upper(), self.button_handler,
+                                (width, height))
             button.code = letter
             col = col + 1
             if col > max_col:
@@ -58,16 +80,8 @@ class ClimateScreen(BaseScreen):
             self.pin_sprite = LcarsText(colours.ORANGE, (147, 127), "PIN: %s" % self.pin_text(), 2.0)
 
             all_sprites.add(self.pin_sprite, layer=2)
-
         self.pin_entry_sprites = all_sprites.get_sprites_from_layer(2)
-
         self.hide_pin_entry()
-
-        if self.napi.authorization_required:
-            self.show_pin_entry()
-        else:
-            for device in self.napi.thermostats:
-                print(device)
 
     def get_auth_url(self):
         if self.auth_url is None:
@@ -118,7 +132,28 @@ class ClimateScreen(BaseScreen):
     def submit_pin(self):
         try:
             self.napi.request_token(self.pin_text())
+            # Try to login, and if we can, refresh the screen to let that kick in.
+            self.loadScreen(ClimateScreen(self.app))
         except Exception:
             self.sound_denied.play()
             self.pin = []
             self.update_pin_sprite()
+
+    def add_thermostats(self, all_sprites):
+        x_orig = 127
+        y_orig = 107
+        padding = 20
+        width = 122
+        height = 44
+        row = 0
+        col = 0
+        for thermostat in self.napi.thermostats:
+            x = x_orig + (col * (width + padding / 2))
+            y = y_orig + (row * (height + padding / 2))
+            button = ThermostatButton(thermostat, (y, x))
+            col = col + 1
+            if col > 4:
+                row = row + 1
+                col = 0
+
+            all_sprites.add(button, layer=3)
