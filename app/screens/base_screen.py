@@ -41,7 +41,9 @@ class BaseScreen(LcarsScreen):
         all_sprites.add(self.logout, layer=4)
 
         self.beep1 = Sound("assets/audio/panel/201.wav")
-        Sound("assets/audio/panel/220.wav").play()
+
+        if not self.app.is_screen_off:
+            Sound("assets/audio/panel/220.wav").play()
 
     def logout_handler(self, item, event, clock):
         self.logout.visible = False

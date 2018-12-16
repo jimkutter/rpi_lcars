@@ -87,7 +87,9 @@ class ScreenAuthorize(BaseScreen):
         self.layer2 = all_sprites.get_sprites_from_layer(2)
 
         # sounds
-        Sound("assets/audio/panel/215.wav").play()
+        if not self.app.is_screen_off:
+            Sound("assets/audio/panel/215.wav").play()
+
         self.sound_granted = Sound("assets/audio/accessing.wav")
         self.sound_beep1 = Sound("assets/audio/panel/201.wav")
         self.sound_denied = Sound("assets/audio/access_denied.wav")

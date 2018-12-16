@@ -38,6 +38,10 @@ class BaseLightingScreen(BaseScreen):
         except PhueRegistrationException:
             from screens.register_hue import ScreenRegister
             self.loadScreen(ScreenRegister(self.app))
+        except Exception:
+            from pygame.mixer import Sound
+            Sound("assets/audio/unable_to_comply.wav").play()
+            self.loadScreen(ScreenMain(self.app))
 
     def back_handler(self, item, event, clock):
         self.loadScreen(ScreenMain(self.app))

@@ -23,6 +23,7 @@ class App(object):
         self.firstScreen = ScreenAuthorize(self)
 
         self.assets = {}
+        self.is_screen_off = False
 
     def run(self):
         ui = UserInterface(self.firstScreen, RESOLUTION, UI_PLACEMENT_MODE, FPS, DEV_MODE)
@@ -33,9 +34,11 @@ class App(object):
             ui.tick()
 
     def screen_off(self):
+        self.is_screen_off = True
         bl.set_power(False)
 
     def screen_on(self):
+        self.is_screen_off = True
         bl.set_power(True)
 
     def load_assets(self):
