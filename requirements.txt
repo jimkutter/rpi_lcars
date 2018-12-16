@@ -3,4 +3,5 @@ pillow
 psutil
 phue
 rpi_backlight
-
+python-nest
+requests

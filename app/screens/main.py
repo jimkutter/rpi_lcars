@@ -19,6 +19,10 @@ class ScreenMain(BaseScreen):
         from screens.lighting import ScreenLightGroups
         self.loadScreen(ScreenLightGroups(self.app))
 
+    def climate_handler(self, item, event, clock):
+        from screens.climate import ClimateScreen
+        self.loadScreen(ClimateScreen(self.app))
+
     def self_destruct(self, item, event, clock):
         from screens.destruct import ScreenDestruct
         self.loadScreen(ScreenDestruct(self.app))
@@ -28,6 +32,7 @@ class ScreenMain(BaseScreen):
 
         actions = {
             'lights': self.lights_handler,
+            'life support': self.climate_handler,
         }
 
         x_orig = 127

@@ -1,5 +1,7 @@
-from ui.widgets.sprite import LcarsWidget
 import pygame
+
+from ui.widgets.sprite import LcarsWidget
+
 
 class LcarsBackground(LcarsWidget):
     def update(self, screen):
