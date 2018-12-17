@@ -35,10 +35,12 @@ class ThermostatScreen(BaseScreen):
 
         all_sprites.add(LcarsBlockMedium(colours.RED_BROWN, (145, 16), "BACK", self.back_handler), layer=1)
 
-        all_sprites.add(LcarsButton(colours.RED_BROWN, (107, 127 + 212), "Warmer", self.warm_handler))
-        all_sprites.add(LcarsButton(colours.BLUE, (107, 127), "Cooler", self.cool_handler))
+        all_sprites.add(LcarsText(colours.ORANGE, (107, 127), "SET TARGET TEMPERATURE", 2.0))
 
-        self.temp_sprite = LcarsText(colours.ORANGE, (107, 127 + 132), self.get_temperature_string(), 2.0)
+        all_sprites.add(LcarsButton(colours.RED_BROWN, (157, 127 + 212), "Warmer", self.warm_handler))
+        all_sprites.add(LcarsButton(colours.BLUE, (157, 127), "Cooler", self.cool_handler))
+
+        self.temp_sprite = LcarsText(colours.ORANGE, (157, 127 + 132), self.get_temperature_string(), 2.0)
 
         all_sprites.add(self.temp_sprite)
 
