@@ -12,7 +12,7 @@ from ui.widgets.lcars_widgets import LcarsBlockMedium, LcarsText, LcarsButton
 
 
 class ThermostatButton(LcarsButton):
-    def __init__(self, thermostat, pos):
+    def __init__(self, thermostat, pos, handler):
         self.thermostat = thermostat
 
         color = colours.RED_BROWN if thermostat.temperature > 65 else colours.GREY_BLUE
@@ -20,10 +20,51 @@ class ThermostatButton(LcarsButton):
         super().__init__(color,
                          pos,
                          "%s (%s)" % (thermostat.name, thermostat.temperature),
-                         self.handler)
+                         handler)
 
-    def handler(self, item, event, clock):
-        pass
+
+class ThermostatScreen(BaseScreen):
+    def __init__(self, app, thermostat):
+        super().__init__(app, "assets/lcars_screen_1.png", thermostat.name_long)
+        self.thermostat = thermostat
+        self.target_temp = self.thermostat.target
+        self.temp_sprite = None
+
+    def setup(self, all_sprites):
+        super().setup(all_sprites)
+
+        all_sprites.add(LcarsBlockMedium(colours.RED_BROWN, (145, 16), "BACK", self.back_handler), layer=1)
+
+        all_sprites.add(LcarsButton(colours.RED_BROWN, (107, 127 + 212), "Warmer", self.warm_handler))
+        all_sprites.add(LcarsButton(colours.BLUE, (107, 127), "Cooler", self.cool_handler))
+
+        self.temp_sprite = LcarsText(colours.ORANGE, (107, 127 + 132), self.get_temperature_string(), 2.0)
+
+        all_sprites.add(self.temp_sprite)
+
+    def update_temp_sprite(self):
+        self.temp_sprite.setText(self.get_temperature_string())
+
+    def warm_handler(self, item, event, clock):
+        self.target_temp += 1
+        if self.target_temp > self.thermostat.max_temperature:
+            self.target_temp = self.thermostat.max_temperature
+
+        self.update_temp_sprite()
+
+    def cool_handler(self, item, event, clock):
+        self.target_temp -= 1
+        if self.target_temp < self.thermostat.min_temperature:
+            self.target_temp = self.thermostat.min_temperature
+
+        self.update_temp_sprite()
+
+    def back_handler(self, item, event, clock):
+        self.thermostat.target = self.target_temp
+        self.loadScreen(ClimateScreen(self.app))
+
+    def get_temperature_string(self):
+        return "%s" % self.target_temp
 
 
 class ClimateScreen(BaseScreen):
@@ -102,6 +143,10 @@ class ClimateScreen(BaseScreen):
 
         return self.auth_url
 
+    def thermostat_button_handler(self, item, event, clock):
+        self.loadScreen(ThermostatScreen(self.app, item.thermostat))
+        pass
+
     def button_handler(self, item, event, clock):
         if item.code == "DEL" and len(self.pin) > 0:
             self.pin.pop()
@@ -150,7 +195,7 @@ class ClimateScreen(BaseScreen):
         for thermostat in self.napi.thermostats:
             x = x_orig + (col * (width + padding / 2))
             y = y_orig + (row * (height + padding / 2))
-            button = ThermostatButton(thermostat, (y, x))
+            button = ThermostatButton(thermostat, (y, x), self.thermostat_button_handler)
             col = col + 1
             if col > 4:
                 row = row + 1
